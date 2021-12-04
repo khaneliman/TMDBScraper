@@ -1,0 +1,50 @@
+﻿@page "/moviesearch"
+@using TMDBScraper.Shared
+@inject HttpClient Http
+<h3>MovieSearch</h3>
+
+<PageTitle>Movie Search</PageTitle>
+
+@if (movies == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Release Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movie in movies)
+            {
+                <tr>
+                    <td>@movie.id</td>
+                    <td>@movie.title</td>
+                    <td>@movie.release_date</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        Page @discoverResult?.page of @discoverResult?.total_pages
+        <span class="float-right" style="text-align: right; width: 100%;">
+        Results: @discoverResult?.total_results
+    </span>
+    </div>
+    
+}
+@code {
+    private Movie[]? movies;
+    private DiscoverResult? discoverResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        discoverResult = await Http.GetFromJsonAsync<DiscoverResult>("MovieSearch/discover/207317");
+        movies = discoverResult?.results;
+    }
+}
