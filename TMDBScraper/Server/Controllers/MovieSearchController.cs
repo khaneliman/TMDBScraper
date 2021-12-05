@@ -5,7 +5,7 @@ using TMDBScraper.Shared;
 
 namespace TMDBScraper.Server.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class MovieSearchController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace TMDBScraper.Server.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "Base", "Get" };
+            return new string[] { };
         }
 
         // GET api/<MovieSearch>/keyword

@@ -1,26 +1,34 @@
 ﻿@page "/moviesearch"
 @using TMDBScraper.Shared
 @inject HttpClient Http
+@using Microsoft.Extensions.Logging
+@inject ILogger<MovieSearch> Logger
+
 <h3>MovieSearch</h3>
 
 <PageTitle>Movie Search</PageTitle>
 
-@if (movies == null)
+<EditForm Model="@movieSearchKeyword" OnValidSubmit="@HandleValidSubmit">
+    <InputText id="searchField" @bind-Value="movieSearchKeyword.Keyword" aria-placeholder="Keyword" />
+    <button type="submit">Submit</button>
+</EditForm>
+
+@if (movies == null && movieSearchKeyword.Keyword != "")
 {
     <p><em>Loading...</em></p>
 }
 else
 {
     <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Release Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var movie in movies)
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Release Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var movie in movies)
             {
                 <tr>
                     <td>@movie.id</td>
@@ -31,20 +39,34 @@ else
         </tbody>
     </table>
     <div>
-        Page @discoverResult?.page of @discoverResult?.total_pages
-        <span class="float-right" style="text-align: right; width: 100%;">
-        Results: @discoverResult?.total_results
-    </span>
-    </div>
-    
+    Page @discoverResult?.page of @discoverResult?.total_pages
+    <br />
+    Results: @movies.Length of @discoverResult?.total_results
+</div>
+
 }
 @code {
+    MovieSearchKeyword movieSearchKeyword = new MovieSearchKeyword();
+    public class MovieSearchKeyword
+    {
+           public string Keyword { get; set; } = "";
+    }
+
     private Movie[]? movies;
     private DiscoverResult? discoverResult;
 
     protected override async Task OnInitializedAsync()
     {
-        discoverResult = await Http.GetFromJsonAsync<DiscoverResult>("MovieSearch/discover/207317");
+        @* discoverResult = await Http.GetFromJsonAsync<DiscoverResult>("api/MovieSearch/discover/207317");
+            movies = discoverResult?.results; *@
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Logger.LogInformation("HandleValidSubmit called");
+
+        // Process the valid form
+        discoverResult = await Http.GetFromJsonAsync<DiscoverResult>($"api/MovieSearch/discover/{movieSearchKeyword.Keyword}");
         movies = discoverResult?.results;
     }
 }
